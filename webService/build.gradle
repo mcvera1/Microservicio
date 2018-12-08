@@ -1,0 +1,51 @@
+buildscript {
+    repositories {
+        mavenCentral()
+    }
+    dependencies {
+        classpath("org.springframework.boot:spring-boot-gradle-plugin:1.5.10.RELEASE")
+        classpath "se.transmode.gradle:gradle-docker:1.2" 
+    }
+}
+
+group = 'mcvera123'
+ 
+apply plugin: 'java'
+apply plugin: 'eclipse'
+apply plugin: 'idea'
+apply plugin: 'org.springframework.boot'
+apply plugin: 'docker'
+
+
+jar {
+    baseName = 'webservice'
+    version =  '1.0.0'
+}
+ 
+//para hacer build con docker es ./gradlew buildDocker en la carpeta del proyecto
+//(se agrega solo para windows)winpty docker run -it -p 8081:8081 mcvera123/webservice /bin/bash
+task buildDocker(type: Docker, dependsOn: build) {
+  push = true
+  applicationName = jar.baseName
+  dockerfile = file('Dockerfile')
+  doFirst {
+    copy {
+      from jar
+      into stageDir
+    }
+  }
+}
+
+repositories {
+    mavenCentral()
+}
+ 
+sourceCompatibility = 1.8
+targetCompatibility = 1.8
+ 
+dependencies {
+    compile("org.springframework.boot:spring-boot-starter-web")
+    compile("org.springframework.boot:spring-boot-starter-data-jpa")
+    
+    testCompile("junit:junit")
+}
